@@ -1,0 +1,83 @@
+---
+title: "Trabajo_Personal_JavierML"
+author: "Javier Martínez Lanciego"
+date: "24/1/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# TRABAJO PERSONAL
+Para la realización del trabajo, se hace uso de la dataset "nycflights13". Para ello, primero se lleva a cabo la instalación del paquete.
+
+```{r}
+install.packages("nycflights13")
+```
+
+## 1. Encuentra todos los vuelos que llegaron más de una hora tarde de lo previsto.
+
+```{r}
+fly<- nycflights13::flights
+
+
+tarde <- fly[which(fly$arr_delay>60),]
+
+dim(tarde)
+print("Hay 27789 vuelos que llegaron mas de una hora tarde")
+```
+
+## 2.  Encuentra todos los vuelos que volaron hacia San Francisco (aeropuertos SFO y OAK) 
+
+```{r}
+ejer2<- fly[fly$dest == "SFO" | fly$dest == "OAK", ]
+dim(ejer2)
+print("13643 vuelos volaron hacia San Francisco")
+```
+
+
+## 3. Encuentra todos los vuelos operados por United American (UA) o por American Airlines (AA)
+
+```{r}
+ejer3<- fly[fly$carrier == "UA" | fly$carrier == "AA", ]
+dim(ejer3)
+print("91394 fueron operados por United American o American Airlines")
+```
+
+## 4.  Encuentra todos los vuelos que salieron los meses de primavera (Abril, Mayo y Junio)
+
+```{r}
+ejer4 <- fly[fly$month == 4 | fly$month == 5 | fly$month == 6, ]
+dim(ejer4)
+print("85369 vuelos salieron en primavera")
+```
+
+
+##  5. Encuentra todos los vuelos que llegaron más de una hora tarde pero salieron con menos de una hora de retraso. 
+
+```{r}
+ejer5 <- fly[which(fly$arr_delay>60 & fly$dep_delay<60), ]
+dim(ejer5)
+print("4956 vuelos llegaron mas de una hora tarde habiendo salido con menos de una hora de retraso")
+```
+
+##  6. Encuentra todos los vuelos que salieron con más de una hora de retraso pero consiguieron llegar con menos de 30 minutos de retraso (el avión aceleró en el aire) 
+
+```{r}
+ejer6 <- fly[which(fly$dep_delay>60 & fly$arr_delay<30), ]
+dim(ejer6)
+print("En 181 ocasiones el avion salio mas de una hora tarde pero consiguio llegar con menos de 30 minutos de retraso")
+
+```
+
+
+## 7. Encuentra todos los vuelos que salen entre medianoche y las 7 de la mañana (vuelos nocturnos). 
+
+
+
+
+
+
+
+
