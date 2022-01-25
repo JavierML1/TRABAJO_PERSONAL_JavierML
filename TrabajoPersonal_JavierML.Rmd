@@ -74,6 +74,22 @@ print("En 181 ocasiones el avion salio mas de una hora tarde pero consiguio lleg
 
 ## 7. Encuentra todos los vuelos que salen entre medianoche y las 7 de la mañana (vuelos nocturnos). 
 
+```{r}
+ejer7 <- fly[which(fly$hour>=0 & fly$hour<=7), ]
+dim(ejer7)
+print("50726 vuelos se produjeron entre las medianoche y las 7 de la mañana")
+```
+
+## 8. ¿Cuántos vuelos tienen un valor desconocido de dep_time? 
+
+```{r}
+ejer8 <- fly[is.na(fly$dep_time), ]
+dim(ejer8)
+print("8255 vuelos tienen un valor desconocido de dep_time")
+```
+
+## 9. ¿Qué variables del dataset contienen valores desconocidos?
+
 
 
 

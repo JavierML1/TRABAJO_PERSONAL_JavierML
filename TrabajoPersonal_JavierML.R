@@ -37,3 +37,12 @@ dim(ejer7)
 print("50726 vuelos se produjeron entre las medianoche y las 7 de la mañana")
 
 
+ejer8 <- fly[is.na(fly$dep_time), ]
+dim(ejer8)
+print("8255 vuelos tienen un valor desconocido de dep_time")
+
+
+?arrange
+
+
+
