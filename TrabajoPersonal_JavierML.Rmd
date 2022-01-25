@@ -90,6 +90,87 @@ print("8255 vuelos tienen un valor desconocido de dep_time")
 
 ## 9. ¿Qué variables del dataset contienen valores desconocidos?
 
+```{r}
+apply(X = is.na(fly), MARGIN = 2, FUN = sum)
+```
+
+
+## 10. Ordena los vuelos de flights para encontrar los vuelos más retrasados en la salida. ¿Qué vuelos fueron los que salieron los primeros antes de lo previsto?
+
+Los vuelos mas retrasados en la salida fueron:
+
+```{r}
+ejer10.1 <- fly[order(fly$dep_delay, na.last=FALSE), ]
+tail(ejer10.1)
+```
+
+Los vuelos que salieron los primeros antes de lo previsto fueron:
+
+```{r}
+ejer10.2 <- fly[order(fly$dep_delay), ]
+head(ejer10.2)
+```
+
+
+## 11.  Ordena los vuelos de flights para encontrar los vuelos más rápidos. Usa el concepto de rapidez que consideres.
+
+Los vuelos mas rapidos fueron:
+
+```{r}
+fly$vel_med <- (fly$distance/fly$air_time)
+ejer11 <- fly[order(fly$vel_med, decreasing=TRUE), ]
+head(ejer11)
+```
+
+
+## 12.  ¿Qué vuelos tienen los trayectos más largos?
+
+```{r}
+ejer12 <- fly[order(fly$distance, decreasing=TRUE), ]
+head(ejer12)
+```
+
+
+## 13. ¿Qué vuelos tienen los trayectos más cortos? 
+
+```{r}
+ejer13 <- fly[order(fly$distance), ]
+head(ejer13)
+```
+
+
+## 14. El dataset de vuelos tiene dos variables, dep_time y sched_dep_time muy útiles pero difíciles de usar por cómo vienen dadas al no ser variables continuas. Fíjate que cuando pone 559, se refiere a que el vuelo salió a las 5:59... Convierte este dato en otro más útil que represente el número de minutos que pasan desde media noche. 
+
+```{r}
+fly$dep_time_min <- (fly$dep_time %/% 100 * 60 + fly$dep_time %% 100)
+
+fly$sched_dep_time_min <- (fly$sched_dep_time %/% 100 * 60 + fly$sched_dep_time %% 100)
+```
+
+Con esos dos comandos se crean dos nuevas columnas en la dataset de vuelos que reflejan la hora de salida real y la hora de salida que debería de tener representadas por el numero de minutos que pasan desde medianoche.
+
+## 15. Compara los valores de dep_time, sched_dep_time y dep_delay. ¿Cómo deberían relacionarse estos tres números? Compruébalo y haz las correcciones numéricas que  necesitas. 
+
+Al compararlas, debería ocurrir que la resta del horario real de salida menos el horario que estaba programado, deberia de dar igual al delay en la salida. Esto no ocurre porque está puesto en formato HMM o HHMM. Por ello si efectuamos esta resta con las nuevas columnas creadas en el ejercicio 14, si que nos dan el dep_delay, ya que si que están pasadas al formato en minutos. Para comprobar que esto es cierto, creo una nueva columna llamada resta en la que efectuo la operacion |dep_time_min - sched_dep_time_min| - |dep_delay| . Toda esta columna deberia de dar 0 para todos los registros.
+
+```{r}
+fly$resta <- (abs(fly$dep_time_min - fly$sched_dep_time_min) - abs(fly$dep_delay))
+table(fly$resta)
+```
+
+Como vemos, la mayoria de resultados son 0, por lo que son correctos, pero hay muchos valores que deben estar mal introducidos porque la resta no da 0. Por ello vamos a cambiarlos.
+
+```{r}
+fly$dep_delay <- (abs(fly$dep_time_min - fly$sched_dep_time_min))
+fly$resta <- (abs(fly$dep_time_min - fly$sched_dep_time_min) - abs(fly$dep_delay))
+table(fly$resta)
+```
+
+
+
+
+
+
 
 
 

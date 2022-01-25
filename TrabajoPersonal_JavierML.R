@@ -42,7 +42,44 @@ dim(ejer8)
 print("8255 vuelos tienen un valor desconocido de dep_time")
 
 
-?arrange
+
+#ejer9
+apply(X = is.na(fly), MARGIN = 2, FUN = sum)
+
+
+ejer10.1 <- fly[order(fly$dep_delay, na.last=FALSE), ]
+tail(ejer10.1)
+
+ejer10.2 <- fly[order(fly$dep_delay), ]
+head(ejer10.2)
 
 
 
+
+fly$vel_med <- (fly$distance/fly$air_time)
+ejer11 <- fly[order(fly$vel_med, decreasing=TRUE), ]
+head(ejer11)
+
+
+ejer12 <- fly[order(fly$distance, decreasing=TRUE), ]
+head(ejer12)
+
+
+ejer13 <- fly[order(fly$distance), ]
+head(ejer13)
+
+
+fly$dep_time_min <- (fly$dep_time %/% 100 * 60 + fly$dep_time %% 100)
+
+fly$sched_dep_time_min <- (fly$sched_dep_time %/% 100 * 60 + fly$sched_dep_time %% 100)
+
+
+#ejer15
+
+fly$resta <- (abs(fly$dep_time_min - fly$sched_dep_time_min) - abs(fly$dep_delay))
+table(fly$resta)
+
+
+fly$dep_delay <- (abs(fly$dep_time_min - fly$sched_dep_time_min))
+fly$resta <- (abs(fly$dep_time_min - fly$sched_dep_time_min) - abs(fly$dep_delay))
+table(fly$resta)
