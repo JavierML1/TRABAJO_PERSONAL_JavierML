@@ -76,10 +76,95 @@ fly$sched_dep_time_min <- (fly$sched_dep_time %/% 100 * 60 + fly$sched_dep_time 
 
 #ejer15
 
-fly$resta <- (abs(fly$dep_time_min - fly$sched_dep_time_min) - abs(fly$dep_delay))
-table(fly$resta)
+fly$relacion <-  (fly$dep_time_min - fly$sched_dep_time_min - fly$dep_delay)
+table(fly$relacion)
 
 
-fly$dep_delay <- (abs(fly$dep_time_min - fly$sched_dep_time_min))
-fly$resta <- (abs(fly$dep_time_min - fly$sched_dep_time_min) - abs(fly$dep_delay))
-table(fly$resta)
+#ejer16
+
+cancelado_por_dia <- 
+  fly %>%
+  mutate(cancelado = (is.na(arr_delay) | is.na(dep_delay))) %>%
+  group_by(year, month, day) %>%
+  summarise(
+    cancelado_num = sum(cancelado),
+    flights_num = n(),
+  )
+
+ggplot(cancelado_por_dia) +
+  geom_point(aes(x = flights_num, y = cancelado_num))
+
+
+#ejer17
+
+cancelados_y_retrasos <- 
+  fly %>%
+  mutate(cancelado = (is.na(arr_delay) | is.na(dep_delay))) %>%
+  group_by(year, month, day) %>%
+  summarise(
+    prop_cancelado = mean(cancelado),
+    media_dep_delay = mean(dep_delay, na.rm = TRUE),
+    media_arr_delay = mean(arr_delay, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+ggplot(cancelados_y_retrasos) +
+  geom_point(aes(x = media_dep_delay, y = prop_cancelado))
+
+ggplot(cancelados_y_retrasos) +
+  geom_point(aes(x = media_arr_delay, y = prop_cancelado))
+
+#eje18
+
+
+
+#ejer19
+
+fly %>%
+  group_by(carrier) %>%
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(arr_delay))
+
+fly %>%
+  group_by(carrier) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  arrange(desc(dep_delay))
+
+
+#ejer20
+
+fly %>%
+  group_by(hour) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  arrange(dep_delay)
+
+
+#ejer21
+
+
+#ejer22
+
+fly %>%
+  filter(arr_delay > 0) %>%
+  group_by(dest) %>%
+  mutate(
+    arr_delay_total = sum(arr_delay),
+    arr_delay_prop = arr_delay / arr_delay_total
+  ) %>%
+  select(dest, month, day, dep_time, carrier, flight,
+         arr_delay, arr_delay_prop) %>%
+  arrange(dest, desc(arr_delay_prop))
+
+
+
+
+
+
+
+
+
+
+
+
+
+

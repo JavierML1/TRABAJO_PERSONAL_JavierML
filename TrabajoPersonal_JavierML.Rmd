@@ -91,6 +91,8 @@ print("8255 vuelos tienen un valor desconocido de dep_time")
 ## 9. ¿Qué variables del dataset contienen valores desconocidos?
 
 ```{r}
+install.packages("tidyverse")
+library(tidyverse)
 apply(X = is.na(fly), MARGIN = 2, FUN = sum)
 ```
 
@@ -151,27 +153,92 @@ Con esos dos comandos se crean dos nuevas columnas en la dataset de vuelos que r
 
 ## 15. Compara los valores de dep_time, sched_dep_time y dep_delay. ¿Cómo deberían relacionarse estos tres números? Compruébalo y haz las correcciones numéricas que  necesitas. 
 
-Al compararlas, debería ocurrir que la resta del horario real de salida menos el horario que estaba programado, deberia de dar igual al delay en la salida. Esto no ocurre porque está puesto en formato HMM o HHMM. Por ello si efectuamos esta resta con las nuevas columnas creadas en el ejercicio 14, si que nos dan el dep_delay, ya que si que están pasadas al formato en minutos. Para comprobar que esto es cierto, creo una nueva columna llamada resta en la que efectuo la operacion |dep_time_min - sched_dep_time_min| - |dep_delay| . Toda esta columna deberia de dar 0 para todos los registros.
+Al comparar los valores deberíamos observar que la resta de dep_time - sched_dep_time debería de coincidir con dep_delay. Tal y como están introducidos los datos en la database eso no ocurre porque dep_time y sched_dep_time están introducidos en formato HMM o HHMM y dep_delay está introducido en minutos. Por ello, si utilizamos las columnas creadas en el ejercicio 14 dep_time_min y sched_dep_time_min, si que nos deberia cumplir la relacion. Para comprobar que esto es cierto creamos una columna nueva llamada relacion que está formada por la operacion dep_time_min - sched_dep_time_min - dep_delay y nos debería de dar 0 para todos los casos.
 
 ```{r}
-fly$resta <- (abs(fly$dep_time_min - fly$sched_dep_time_min) - abs(fly$dep_delay))
-table(fly$resta)
+fly$relacion <-  (fly$dep_time_min - fly$sched_dep_time_min - fly$dep_delay)
+table(fly$relacion)
 ```
 
-Como vemos, la mayoria de resultados son 0, por lo que son correctos, pero hay muchos valores que deben estar mal introducidos porque la resta no da 0. Por ello vamos a cambiarlos.
+Como se ve, quitando los NA, casi todos los casos da un resultado de 0, por lo que es correcta la relación. Hay algunos casos, en los que el vuelo estaba programado para salir antes de medianoche y salió despues de medianoche, en los que el resultados es -1440, que corresponde a 24 horas. Por lo tanto, los únicos casos en los que el retraso en la salida no es igual a la diferencia entre la hora de salida programada y la hora de salida real se debe a una peculiaridad en la forma de almacenar estas columnas.
+
+## 16.  Investiga si existe algún patrón del número de vuelos que se cancelan cada día. 
 
 ```{r}
-fly$dep_delay <- (abs(fly$dep_time_min - fly$sched_dep_time_min))
-fly$resta <- (abs(fly$dep_time_min - fly$sched_dep_time_min) - abs(fly$dep_delay))
-table(fly$resta)
+cancelado_por_dia <- 
+  fly %>%
+  mutate(cancelado = (is.na(arr_delay) | is.na(dep_delay))) %>%
+  group_by(year, month, day) %>%
+  summarise(
+    cancelado_num = sum(cancelado),
+    flights_num = n(),
+  )
+
+ggplot(cancelado_por_dia) +
+  geom_point(aes(x = flights_num, y = cancelado_num))
 ```
 
+Podemos observar que existe una gran relación ya qte a mayor numero de vuelos, mayor numero de vuelos cancelados.
+
+
+## 17. Investiga si la proporción de vuelos cancelados está relacionada con el retraso promedio por día en los vuelos.
+
+```{r}
+cancelados_y_retrasos <- 
+  fly %>%
+  mutate(cancelado = (is.na(arr_delay) | is.na(dep_delay))) %>%
+  group_by(year, month, day) %>%
+  summarise(
+    prop_cancelado = mean(cancelado),
+    media_dep_delay = mean(dep_delay, na.rm = TRUE),
+    media_arr_delay = mean(arr_delay, na.rm = TRUE)
+  ) %>%
+  ungroup()
+
+ggplot(cancelados_y_retrasos) +
+  geom_point(aes(x = media_dep_delay, y = prop_cancelado))
+
+```
+
+Hay una fuerte relacion entre el retraso en las salidas y en las llegadas con la proporcion de vuelos cancelados.
+
+## 18. Investiga si la proporción de vuelos cancelados está relacionada con el retraso promedio por aeropuerto en los vuelos.
 
 
 
+## 19.  ¿Qué compañía aérea sufre los peores retrasos?
+
+```{r}
+fly %>%
+  group_by(carrier) %>%
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(arr_delay))
+
+fly %>%
+  group_by(carrier) %>%
+  summarise(dep_delay = mean(dep_delay, na.rm = TRUE)) %>%
+  arrange(desc(dep_delay))
+
+```
+
+La peor compañia tanto en retrasos en la salida como en la llegada es F9.
+
+## 20.  Queremos saber qué hora del día nos conviene volar si queremos evitar los retrasos en la salida. 
+
+```{r}
+fly %>%
+  group_by(hour) %>%
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(arr_delay)
+```
+
+La mejor hora del dia para volar si queremos evitar los retrasos en la salida son las 5 de la mañana
+
+## 21. Queremos saber qué día de la semana nos conviene volar si queremos evitar los retrasos en la salida.
 
 
 
+## 22. Para cada destino, calcula el total de minutos de retraso acumulado.
 
 
 
