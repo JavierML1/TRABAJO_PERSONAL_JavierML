@@ -114,9 +114,24 @@ ggplot(cancelados_y_retrasos) +
 ggplot(cancelados_y_retrasos) +
   geom_point(aes(x = media_arr_delay, y = prop_cancelado))
 
-#eje18
+# E18 MIRAR CON JAVI
 
+cancelados_y_retrasos_A <- 
+  fly %>%
+  mutate(cancelado = (is.na(arr_delay) | is.na(dep_delay))) %>%
+  group_by(origin, dest) %>%
+  summarise(
+    prop_cancelado = mean(cancelado),
+    media_dep_delay = mean(dep_delay, na.rm = TRUE),
+    media_arr_delay = mean(arr_delay, na.rm = TRUE)
+  ) %>%
+  ungroup()
 
+ggplot(cancelados_y_retrasos_A) +
+  geom_point(aes(x = media_dep_delay, y = prop_cancelado))
+
+ggplot(cancelados_y_retrasos_A) +
+  geom_point(aes(x = media_arr_delay, y = prop_cancelado))
 
 #ejer19
 
@@ -139,21 +154,92 @@ fly %>%
   arrange(dep_delay)
 
 
-#ejer21
+# E21
+make_datetime_100 <- function(year, month, day, time) 
+{ 
+  make_datetime(year, month, day, time %/% 100, time %% 100) 
+}
 
+flights_dt <- fly %>% 
+  filter(!is.na(dep_time), !is.na(arr_time)) %>% 
+  mutate( dep_time = make_datetime_100(year, month, day, dep_time), 
+          arr_time = make_datetime_100(year, month, day, arr_time), 
+          sched_dep_time = make_datetime_100(year, month, day, sched_dep_time), 
+          sched_arr_time = make_datetime_100(year, month, day, sched_arr_time) ) %>% 
+  select(origin, dest, ends_with("delay"), ends_with("time"))
 
-#ejer22
-
-fly %>%
-  filter(arr_delay > 0) %>%
-  group_by(dest) %>%
-  mutate(
-    arr_delay_total = sum(arr_delay),
-    arr_delay_prop = arr_delay / arr_delay_total
+flights_dt2<- flights_dt %>%
+  mutate(dow = wday(sched_dep_time)) %>%
+  group_by(dow) %>%
+  summarise(
+    dep_delay = mean(dep_delay),
+    arr_delay = mean(arr_delay, na.rm = TRUE)
   ) %>%
-  select(dest, month, day, dep_time, carrier, flight,
-         arr_delay, arr_delay_prop) %>%
-  arrange(dest, desc(arr_delay_prop))
+  print(n = Inf)
+
+flights_dt %>%
+  mutate(wday = wday(dep_time, label = TRUE)) %>% #porque de dep_time
+  group_by(wday) %>% 
+  summarize(ave_dep_delay = mean(dep_delay, na.rm = TRUE)) %>% 
+  ggplot(aes(x = wday, y = ave_dep_delay)) + 
+  geom_bar(stat = "identity") 
+
+
+# E22
+retraso_acum<- fly %>% 
+  filter(arr_delay > 0) %>% 
+  group_by(dest) %>% 
+  summarise(total_delay= sum(arr_delay))%>% 
+  arrange(total_delay)
+
+retraso_acum
+
+
+
+
+
+# E23
+
+suma_retrasos <-sum(retraso_acum$total_delay)
+proporcion_retrasos <- retraso_acum$total_delay / suma_retrasos
+
+retrasos_prop <- data.frame(retraso_acum$dest , proporcion_retrasos)
+
+retrasos_prop
+
+
+
+
+#retraso_acum2<- vuelos %>% 
+filter(arr_delay > 0) %>% 
+  group_by(dest, origin, carrier, flight) %>% 
+  summarise(arr_delay = sum(arr_delay)) %>% 
+  group_by(dest) %>% 
+  mutate( arr_delay_prop = arr_delay / sum(arr_delay) ) %>% 
+  arrange(dest, desc(arr_delay_prop)) %>% 
+  select(carrier, flight, origin, dest, arr_delay_prop)
+
+
+# 24
+library(lubridate)
+flights_dt %>% 
+  mutate(sched_dep_hour = hour(sched_dep_time)) %>% #ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  group_by(sched_dep_hour) %>% 
+  summarise(dep_delay = mean(dep_delay)) %>% 
+  ggplot(aes(y = dep_delay, x = sched_dep_hour)) + 
+  geom_point() + geom_smooth()
+
+
+
+#ejer26
+sessionInfo()
+
+
+
+
+
+
+
 
 
 
