@@ -12,13 +12,13 @@ knitr::opts_chunk$set(echo = TRUE)
 # TRABAJO PERSONAL
 Para la realización del trabajo, se hace uso de la dataset "nycflights13". Para ello, primero se lleva a cabo la instalación del paquete.
 
-```{r}
-install.packages("nycflights13")
-```
 
 ## 1. Encuentra todos los vuelos que llegaron más de una hora tarde de lo previsto.
 
 ```{r}
+library(tidyverse)
+library(lubridate)
+
 fly<- nycflights13::flights
 
 
@@ -91,8 +91,6 @@ print("8255 vuelos tienen un valor desconocido de dep_time")
 ## 9. ¿Qué variables del dataset contienen valores desconocidos?
 
 ```{r}
-install.packages("tidyverse")
-library(tidyverse)
 apply(X = is.na(fly), MARGIN = 2, FUN = sum)
 ```
 
